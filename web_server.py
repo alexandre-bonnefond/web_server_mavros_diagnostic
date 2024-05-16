@@ -2,6 +2,7 @@ from flask import Flask, jsonify, render_template, Response, stream_with_context
 from flask_httpauth import HTTPBasicAuth
 import subprocess
 import threading
+import json
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
@@ -83,9 +84,8 @@ def run_rosnode(package, node_name):
         if "CPU" in output:
             parameter_status["System"]["CPU Load"] = output[-1] + '%'
         
-        # Add more parsing logic for other parameters here
-
-        yield f"data: {output}\n\n"
+        # Convert the parameter_status to JSON and yield it
+        yield f"data: {json.dumps(parameter_status)}\n\n"
     process.stdout.close()
     process.wait()
 

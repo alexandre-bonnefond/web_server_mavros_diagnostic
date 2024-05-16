@@ -43,24 +43,21 @@
             eventSource.onmessage = function(event) {
                 const data = JSON.parse(event.data);
                 // Update the status based on the output received from the ROS node
-                if ("FCU" in data) {
-                    $('#fcu-connected').text(data.FCU.Connected).css('color', data.FCU.Connected === 'connected' ? 'green' : 'red');
-                    $('#fcu-heartbeat').text(data.FCU.Heartbeat).css('color', data.FCU.Heartbeat !== '0Hz' ? 'green' : 'red');
-                }
-                if ("System" in data) {
-                    $('#system-3d-gyro').text(data.System["3D Gyro"]).css('color', data.System["3D Gyro"] === 'Pass' ? 'green' : 'red');
-                    $('#system-3d-accelerometer').text(data.System["3D Accelerometer"]).css('color', data.System["3D Accelerometer"] === 'Pass' ? 'green' : 'red');
-                    $('#system-3d-magnetometer').text(data.System["3D Magnetometer"]).css('color', data.System["3D Magnetometer"] === 'Pass' ? 'green' : 'red');
-                    $('#system-gps-state').text(data.System["GPS State"]).css('color', data.System["GPS State"] === 'Pass' ? 'green' : 'red');
-                    $('#system-gps-satellites').text(data.System["GPS Satellites"]).css('color', data.System["GPS Satellites"] !== '0' ? 'green' : 'red');
-                    $('#system-rc-receiver').text(data.System["RC Receiver"]).css('color', data.System["RC Receiver"] === 'Pass' ? 'green' : 'red');
-                    $('#system-ahrs').text(data.System["AHRS"]).css('color', data.System["AHRS"] === 'Pass' ? 'green' : 'red');
-                    $('#system-battery-state').text(data.System["Battery State"]).css('color', data.System["Battery State"] === 'Pass' ? 'green' : 'red');
-                    $('#system-battery-voltage').text(data.System["Battery Voltage"]).css('color', data.System["Battery Voltage"] !== '0V' ? 'green' : 'red');
-                    $('#system-battery-current').text(data.System["Battery Current"]).css('color', data.System["Battery Current"] !== '0A' ? 'green' : 'red');
-                    $('#system-pre-arm-check').text(data.System["Pre-Arm Check"]).css('color', data.System["Pre-Arm Check"] === 'Pass' ? 'green' : 'red');
-                    $('#system-cpu-load').text(data.System["CPU Load"]).css('color', data.System["CPU Load"] !== '0%' ? 'green' : 'red');
-                }
+                $('#fcu-connected').text(data.FCU.Connected).css('color', data.FCU.Connected === 'connected' ? 'green' : 'red');
+                $('#fcu-heartbeat').text(data.FCU.Heartbeat).css('color', data.FCU.Heartbeat !== '0Hz' ? 'green' : 'red');
+                // Update System parameters
+                $('#system-3d-gyro').text(data.System["3D Gyro"]).css('color', data.System["3D Gyro"] === 'Pass' ? 'green' : 'red');
+                $('#system-3d-accelerometer').text(data.System["3D Accelerometer"]).css('color', data.System["3D Accelerometer"] === 'Pass' ? 'green' : 'red');
+                $('#system-3d-magnetometer').text(data.System["3D Magnetometer"]).css('color', data.System["3D Magnetometer"] === 'Pass' ? 'green' : 'red');
+                $('#system-gps-state').text(data.System["GPS State"]).css('color', data.System["GPS State"] === 'Pass' ? 'green' : 'red');
+                $('#system-gps-satellites').text(data.System["GPS Satellites"]).css('color', data.System["GPS Satellites"] !== '0' ? 'green' : 'red');
+                $('#system-rc-receiver').text(data.System["RC Receiver"]).css('color', data.System["RC Receiver"] === 'Pass' ? 'green' : 'red');
+                $('#system-ahrs').text(data.System["AHRS"]).css('color', data.System["AHRS"] === 'Pass' ? 'green' : 'red');
+                $('#system-battery-state').text(data.System["Battery State"]).css('color', data.System["Battery State"] === 'Pass' ? 'green' : 'red');
+                $('#system-battery-voltage').text(data.System["Battery Voltage"]).css('color', data.System["Battery Voltage"] !== '0V' ? 'green' : 'red');
+                $('#system-battery-current').text(data.System["Battery Current"]).css('color', data.System["Battery Current"] !== '0A' ? 'green' : 'red');
+                $('#system-pre-arm-check').text(data.System["Pre-Arm Check"]).css('color', data.System["Pre-Arm Check"] === 'Pass' ? 'green' : 'red');
+                $('#system-cpu-load').text(data.System["CPU Load"]).css('color', data.System["CPU Load"] !== '0%' ? 'green' : 'red');
             };
             eventSource.onerror = function() {
                 eventSource.close();
