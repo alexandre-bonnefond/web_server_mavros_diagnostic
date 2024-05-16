@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="text-center">Drone Status Evaluation</h1>
+    <h1 class="text-center">Server Status Dashboard</h1>
     <div class="row justify-content-center">
         <div class="col-md-8">
             <!-- FCU Status -->
@@ -10,8 +10,8 @@
                     FCU Status
                 </div>
                 <div class="card-body">
-                    <p>Connected: <span id="fcu-connected">Not running</span></p>
-                    <p>Heartbeat: <span id="fcu-heartbeat">Not running</span></p>
+                    <p>Connected: <span id="fcu-connected" style="color: red;">Fail</span></p>
+                    <p>Heartbeat: <span id="fcu-heartbeat" style="color: red;">0Hz</span></p>
                 </div>
             </div>
             <!-- System Status -->
@@ -20,18 +20,18 @@
                     System Status
                 </div>
                 <div class="card-body">
-                    <p>3D Gyro: <span id="system-3d-gyro">Not running</span></p>
-                    <p>3D Accelerometer: <span id="system-3d-accelerometer">Not running</span></p>
-                    <p>3D Magnetometer: <span id="system-3d-magnetometer">Not running</span></p>
-                    <p>GPS State: <span id="system-gps-state">Not running</span></p>
-                    <p>GPS Satellites: <span id="system-gps-satellites">Not running</span></p>
-                    <p>RC Receiver: <span id="system-rc-receiver">Not running</span></p>
-                    <p>AHRS: <span id="system-ahrs">Not running</span></p>
-                    <p>Battery State: <span id="system-battery-state">Not running</span></p>
-                    <p>Battery Voltage: <span id="system-battery-voltage">Not running</span></p>
-                    <p>Battery Current: <span id="system-battery-current">Not running</span></p>
-                    <p>Pre-Arm Check: <span id="system-pre-arm-check">Not running</span></p>
-                    <p>CPU Load: <span id="system-cpu-load">Not running</span></p>
+                    <p>3D Gyro: <span id="system-3d-gyro" style="color: red;">Fail</span></p>
+                    <p>3D Accelerometer: <span id="system-3d-accelerometer" style="color: red;">Fail</span></p>
+                    <p>3D Magnetometer: <span id="system-3d-magnetometer" style="color: red;">Fail</span></p>
+                    <p>GPS State: <span id="system-gps-state" style="color: red;">Fail</span></p>
+                    <p>GPS Satellites: <span id="system-gps-satellites" style="color: red;">0</span></p>
+                    <p>RC Receiver: <span id="system-rc-receiver" style="color: red;">Fail</span></p>
+                    <p>AHRS: <span id="system-ahrs" style="color: red;">Fail</span></p>
+                    <p>Battery State: <span id="system-battery-state" style="color: red;">Fail</span></p>
+                    <p>Battery Voltage: <span id="system-battery-voltage" style="color: red;">0V</span></p>
+                    <p>Battery Current: <span id="system-battery-current" style="color: red;">0A</span></p>
+                    <p>Pre-Arm Check: <span id="system-pre-arm-check" style="color: red;">Fail</span></p>
+                    <p>CPU Load: <span id="system-cpu-load" style="color: red;">0%</span></p>
                 </div>
             </div>
         </div>
@@ -41,39 +41,30 @@
         function startNode() {
             const eventSource = new EventSource('/start_rosnode');
             eventSource.onmessage = function(event) {
-                const data = event.data;
+                const data = JSON.parse(event.data);
                 // Update the status based on the output received from the ROS node
-                if (data.includes("connected")) {
-                    $('#fcu-connected').text('Connected').css('color', 'green');
+                if ("FCU" in data) {
+                    $('#fcu-connected').text(data.FCU.Connected).css('color', data.FCU.Connected === 'connected' ? 'green' : 'red');
+                    $('#fcu-heartbeat').text(data.FCU.Heartbeat).css('color', data.FCU.Heartbeat !== '0Hz' ? 'green' : 'red');
                 }
-                if (data.includes("heartbeat")) {
-                    $('#fcu-heartbeat').text('Heartbeat received').css('color', 'green');
+                if ("System" in data) {
+                    $('#system-3d-gyro').text(data.System["3D Gyro"]).css('color', data.System["3D Gyro"] === 'Pass' ? 'green' : 'red');
+                    $('#system-3d-accelerometer').text(data.System["3D Accelerometer"]).css('color', data.System["3D Accelerometer"] === 'Pass' ? 'green' : 'red');
+                    $('#system-3d-magnetometer').text(data.System["3D Magnetometer"]).css('color', data.System["3D Magnetometer"] === 'Pass' ? 'green' : 'red');
+                    $('#system-gps-state').text(data.System["GPS State"]).css('color', data.System["GPS State"] === 'Pass' ? 'green' : 'red');
+                    $('#system-gps-satellites').text(data.System["GPS Satellites"]).css('color', data.System["GPS Satellites"] !== '0' ? 'green' : 'red');
+                    $('#system-rc-receiver').text(data.System["RC Receiver"]).css('color', data.System["RC Receiver"] === 'Pass' ? 'green' : 'red');
+                    $('#system-ahrs').text(data.System["AHRS"]).css('color', data.System["AHRS"] === 'Pass' ? 'green' : 'red');
+                    $('#system-battery-state').text(data.System["Battery State"]).css('color', data.System["Battery State"] === 'Pass' ? 'green' : 'red');
+                    $('#system-battery-voltage').text(data.System["Battery Voltage"]).css('color', data.System["Battery Voltage"] !== '0V' ? 'green' : 'red');
+                    $('#system-battery-current').text(data.System["Battery Current"]).css('color', data.System["Battery Current"] !== '0A' ? 'green' : 'red');
+                    $('#system-pre-arm-check').text(data.System["Pre-Arm Check"]).css('color', data.System["Pre-Arm Check"] === 'Pass' ? 'green' : 'red');
+                    $('#system-cpu-load').text(data.System["CPU Load"]).css('color', data.System["CPU Load"] !== '0%' ? 'green' : 'red');
                 }
-                // Add more status updates for other parameters here
             };
             eventSource.onerror = function() {
                 eventSource.close();
             };
-        }
-
-        function updateStatuses() {
-            $.getJSON('/status_parameters', function(data) {
-                $('#fcu-connected').text(data.FCU.Connected).css('color', data.FCU.Connected === 'connected' ? 'green' : 'red');
-                $('#fcu-heartbeat').text(data.FCU.Heartbeat).css('color', data.FCU.Heartbeat === 'heartbeat received' ? 'green' : 'red');
-                // Update System parameters
-                $('#system-3d-gyro').text(data.System["3D Gyro"]).css('color', data.System["3D Gyro"] === 'running' ? 'green' : 'red');
-                $('#system-3d-accelerometer').text(data.System["3D Accelerometer"]).css('color', data.System["3D Accelerometer"] === 'running' ? 'green' : 'red');
-                $('#system-3d-magnetometer').text(data.System["3D Magnetometer"]).css('color', data.System["3D Magnetometer"] === 'running' ? 'green' : 'red');
-                $('#system-gps-state').text(data.System["GPS State"]).css('color', data.System["GPS State"] === 'running' ? 'green' : 'red');
-                $('#system-gps-satellites').text(data.System["GPS Satellites"]).css('color', data.System["GPS Satellites"] === 'running' ? 'green' : 'red');
-                $('#system-rc-receiver').text(data.System["RC Receiver"]).css('color', data.System["RC Receiver"] === 'running' ? 'green' : 'red');
-                $('#system-ahrs').text(data.System["AHRS"]).css('color', data.System["AHRS"] === 'running' ? 'green' : 'red');
-                $('#system-battery-state').text(data.System["Battery State"]).css('color', data.System["Battery State"] === 'running' ? 'green' : 'red');
-                $('#system-battery-voltage').text(data.System["Battery Voltage"]).css('color', data.System["Battery Voltage"] === 'running' ? 'green' : 'red');
-                $('#system-battery-current').text(data.System["Battery Current"]).css('color', data.System["Battery Current"] === 'running' ? 'green' : 'red');
-                $('#system-pre-arm-check').text(data.System["Pre-Arm Check"]).css('color', data.System["Pre-Arm Check"] === 'running' ? 'green' : 'red');
-                $('#system-cpu-load').text(data.System["CPU Load"]).css('color', data.System["CPU Load"] === 'running' ? 'green' : 'red');
-            });
         }
 
         $(document).ready(function() {
@@ -81,7 +72,6 @@
                 e.preventDefault();
                 startNode();
             });
-            setInterval(updateStatuses, 5000); // Refresh every 5 seconds
         });
     </script>
 {% endblock %}

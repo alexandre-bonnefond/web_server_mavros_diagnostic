@@ -19,7 +19,7 @@ def verify_password(username, password):
 
 processes = {}
 parameter_status = {
-    "FCU": {"Connected": "Not running", "Heartbeat": "0Hz"},
+    "FCU": {"Connected": "Fail", "Heartbeat": "0Hz"},
     "System": {
         "3D Gyro": "Fail",
         "3D Accelerometer": "Fail",
@@ -44,11 +44,14 @@ def start_roslaunch(package, launch_file):
     return "roslaunch started."
 
 def run_rosnode(package, node_name):
+    if 'rosnode' in processes:
+        return "rosnode is already running."
     global parameter_status
     command = ['rosrun', package, node_name]
     process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     processes['rosnode'] = process
     for line in iter(process.stdout.readline, ''):
+        print(line)
         output = line.split()
         # Simulate updating parameter statuses based on the ROS node output
         if "FCU" in output:
