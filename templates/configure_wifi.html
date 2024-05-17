@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2 style="text-align: center;">Network Configuration</h2>
+    {% if result %}
+        <div class="alert alert-info">{{ result }}</div>
+    {% endif %}
+    <form method="post">
+        <div class="form-section">
+            <h3>Ethernet Configuration</h3>
+            <div class="form-group">
+                <label for="eth_name">Ethernet Interface Name</label>
+                <input type="text" class="form-control" id="eth_name" name="eth_name" required>
+            </div>
+            <div class="form-group">
+                <label for="use_dhcp_eth">Use DHCP</label>
+                <select class="form-control" id="use_dhcp_eth" name="use_dhcp_eth">
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+            <div class="form-group" id="eth_static_ip_group">
+                <label for="eth_static_ip">Static IP Address</label>
+                <input type="text" class="form-control" id="eth_static_ip" name="eth_static_ip">
+            </div>
+        </div>
+        <div class="form-section">
+            <h3>Wi-Fi Configuration</h3>
+            <div class="form-group">
+                <label for="wifi_name">Wi-Fi Interface Name</label>
+                <input type="text" class="form-control" id="wifi_name" name="wifi_name" required>
+            </div>
+            <div class="form-group">
+                <label for="use_dhcp_wifi">Use DHCP</label>
+                <select class="form-control" id="use_dhcp_wifi" name="use_dhcp_wifi">
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+            <div class="form-group" id="wifi_static_ip_group">
+                <label for="wifi_static_ip">Static IP Address</label>
+                <input type="text" class="form-control" id="wifi_static_ip" name="wifi_static_ip">
+            </div>
+            <div class="form-group" id="wifi_gateway_group">
+                <label for="wifi_gateway">Gateway</label>
+                <input type="text" class="form-control" id="wifi_gateway" name="wifi_gateway">
+            </div>
+            <div class="form-group">
+                <label for="wifi_ap_name">Access Point Name</label>
+                <input type="text" class="form-control" id="wifi_ap_name" name="wifi_ap_name" required>
+            </div>
+            <div class="form-group">
+                <label for="wifi_password">Access Point Password</label>
+                <input type="password" class="form-control" id="wifi_password" name="wifi_password" required>
+            </div>
+            <div class="form-group" id="wifi_dns_group">
+                <label for="wifi_dns">DNS Server</label>
+                <input type="text" class="form-control" id="wifi_dns" name="wifi_dns">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Apply Configuration</button>
+    </form>
+    <script>
+        document.getElementById('use_dhcp_eth').addEventListener('change', function () {
+            document.getElementById('eth_static_ip_group').style.display = this.value === 'no' ? 'block' : 'none';
+        });
+        document.getElementById('use_dhcp_wifi').addEventListener('change', function () {
+            const showStaticFields = this.value === 'no';
+            document.getElementById('wifi_static_ip_group').style.display = showStaticFields ? 'block' : 'none';
+            document.getElementById('wifi_gateway_group').style.display = showStaticFields ? 'block' : 'none';
+            document.getElementById('wifi_dns_group').style.display = showStaticFields ? 'block' : 'none';
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('eth_static_ip_group').style.display = 'none';
+            document.getElementById('wifi_static_ip_group').style.display = 'none';
+            document.getElementById('wifi_gateway_group').style.display = 'none';
+            document.getElementById('wifi_dns_group').style.display = 'none';
+        });
+    </script>
+{% endblock %}

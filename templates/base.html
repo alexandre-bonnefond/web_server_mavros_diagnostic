@@ -16,43 +16,79 @@
             top: 0;
             left: 0;
             padding-top: 20px;
+            background-color: #f8f9fa;
             border-right: 1px solid #ddd;
         }
         .content {
-            margin-left: 200px;
+            margin-left: 220px; /* Adjusted for better spacing */
             padding: 20px;
+        }
+        .status-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .status-card .card-header {
+            background-color: #385675;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        .status-card .card-body p {
+            font-size: 1.1em;
+            margin: 10px 0;
         }
         .status-light {
             color: red;
-            margin-left: 10px;
+            font-weight: bold;
+        }
+        .logo {
+            width: 110px; /* Adjusted for a bigger logo */
+            height: 110px; /* Adjusted for a bigger logo */
+            margin-right: 10px;
+        }
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
-            <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <nav class="col-md-2 d-none d-md-block sidebar">
                 <div class="sidebar-sticky">
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link" href="/">
+                            <a class="nav-link active" href="/">
                                 Home
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" id="start-launch-link">
-                                Start ROS Launch
+                            <a class="nav-link" href="/start_sensors_evaluation" id="start-sensors-link">
+                                Sensors Evaluation
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" id="start-node-link">
-                                Start ROS Node
+                            <a class="nav-link" href="/documentation" id="documentation-link">
+                                Documentation
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/configure_wifi" id="configure-wifi-link">
+                                Configure Wi-Fi
                             </a>
                         </li>
                     </ul>
                 </div>
             </nav>
             <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4 content">
+                <div class="header-title">
+                    <img src="/static/logof4f.png" alt="Project Logo" class="logo">
+                    <h1><b>Drone Dashboard</b></h1>
+                </div>
                 {% block content %}{% endblock %}
             </main>
         </div>
@@ -60,20 +96,5 @@
 
     <!-- Include jQuery library -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#start-launch-link').click(function(e) {
-                e.preventDefault();
-                $.getJSON('/start_roslaunch', function(data) {
-                    alert(data.message);
-                });
-            });
-
-            $('#start-node-link').click(function(e) {
-                e.preventDefault();
-                startNode();
-            });
-        });
-    </script>
 </body>
 </html>
