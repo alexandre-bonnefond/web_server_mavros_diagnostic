@@ -37,7 +37,7 @@
     </div>
     <script>
         function startSensors() {
-            const eventSource = new EventSource('/start_sensors_evaluation');
+            const eventSource = new EventSource('/start_sensors_stream');
             eventSource.onmessage = function(event) {
                 const data = JSON.parse(event.data);
                 // Update the status based on the output received from the ROS node

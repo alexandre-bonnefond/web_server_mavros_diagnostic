@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="terminal" style="height: 400px; width: 200%;"></div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css" />
+<script src="https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/socket.io-client/dist/socket.io.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var term = new Terminal();
+        var fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+        term.open(document.getElementById('terminal'));
+        fitAddon.fit();
+
+        var socket = io();
+
+        term.onData(function(data) {
+            socket.emit('input', data);
+        });
+
+        socket.on('output', function(data) {
+            term.write(data);
+        });
+
+        // Initial message
+        term.writeln('Welcome to the SSH terminal!');
+    });
+</script>
+{% endblock %}

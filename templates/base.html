@@ -3,48 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Status Dashboard</title>
+    <title>Drone Dashboard</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         body {
-            padding-top: 20px;
+            margin: 0; /* Remove default margin */
+        }
+        .navbar {
+            height: 70px; /* Define the height of the navbar */
+            margin-bottom: 0; /* Remove the bottom margin to align with sidebars */
         }
         .sidebar {
-            height: 100vh;
+            height: calc(100vh - 70px); /* Adjust height to account for the navbar */
             position: fixed;
-            top: 0;
-            left: 0;
-            padding-top: 20px;
+            top: 70px; /* Adjust top to match the navbar height */
             background-color: #f8f9fa;
+        }
+        .left-sidebar {
+            left: 0px; /* Remove margin to the left */
+            width: 200px;
             border-right: 1px solid #ddd;
         }
+        .right-sidebar {
+            right: 0px; /* Remove margin to the right */
+            width: 300px;
+            border-left: 1px solid #ddd;
+        }
         .content {
-            margin-left: 220px; /* Adjusted for better spacing */
+            margin-left: 240px; /* Adjust for the left sidebar width */
+            margin-right: 320px; /* Adjust for the right sidebar width */
             padding: 20px;
         }
         .status-card {
             border: 1px solid #ddd;
             border-radius: 5px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 10px;
         }
-        .status-card .card-header {
-            background-color: #385675;
-            color: white;
-            font-weight: bold;
-            font-size: 1.2em;
+        .status-card h6 {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
         }
-        .status-card .card-body p {
-            font-size: 1.1em;
-            margin: 10px 0;
+        .status-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .status-item img {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
         }
         .status-light {
-            color: red;
-            font-weight: bold;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+        .light-red {
+            background-color: red;
+        }
+        .light-green {
+            background-color: green;
         }
         .logo {
-            width: 110px; /* Adjusted for a bigger logo */
-            height: 110px; /* Adjusted for a bigger logo */
+            width: 110px;
+            height: 110px;
             margin-right: 10px;
         }
         .header-title {
@@ -53,48 +80,182 @@
             justify-content: center;
             margin-bottom: 20px;
         }
+        .sidebar img {
+            max-width: 100%; /* Ensure images do not exceed sidebar width */
+        }
     </style>
 </head>
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Drone Dashboard</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
     <div class="container-fluid">
         <div class="row">
-            <nav class="col-md-2 d-none d-md-block sidebar">
-                <div class="sidebar-sticky">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="/">
-                                Home
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/start_sensors_evaluation" id="start-sensors-link">
-                                Sensors Evaluation
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/documentation" id="documentation-link">
-                                Documentation
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/configure_wifi" id="configure-wifi-link">
-                                Configure Wi-Fi
-                            </a>
-                        </li>
-                    </ul>
+            <nav class="col-md-2 d-none d-md-block sidebar left-sidebar">
+                <div class="drone-info text-center mb-4">
+                    <img src="/static/camera-drone.png" alt="Drone Model" class="img-fluid">
+                    <p><strong>IP:</strong> <span id="drone-ip">192.168.1.1</span></p>
                 </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/start_sensors_evaluation" id="start-sensors-link">
+                            Sensors Evaluation
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/documentation" id="documentation-link">
+                            Documentation
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/configure_wifi" id="configure-wifi-link">
+                            Configure Wi-Fi
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/terminal" id="terminal-link">
+                            Terminal
+                        </a>
+                    </li>
+                </ul>
             </nav>
-            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4 content">
+            <main role="main" class="col-md-8 ml-sm-auto col-lg-8 content">
                 <div class="header-title">
-                    <img src="/static/logof4f.png" alt="Project Logo" class="logo">
+                    <img src="{{ url_for('static', filename='logof4f.png') }}" alt="Project Logo" class="logo">
                     <h1><b>Drone Dashboard</b></h1>
                 </div>
                 {% block content %}{% endblock %}
             </main>
+            <nav class="col-md-2 d-none d-md-block sidebar right-sidebar">
+                <h5 class="text-center mt-4">System Overview</h5>
+                <div class="status-overview">
+                    <div class="status-card">
+                        <h6>FCU Status</h6>
+                        <div class="status-item">
+                            <img src="/static/icons/link.png" alt="Connected Icon">
+                            <strong>Connected: </strong> <span id="fcu-connected">No</span>
+                        </div>
+                        <div class="status-item">
+                            <img src="/static/icons/pulse.png" alt="Heartbeat Icon">
+                            <strong>Heartbeat: </strong> <span id="fcu-heartbeat">0 Hz</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <h6>Sensors Status</h6>
+                        <div class="status-item">
+                            <img src="/static/icons/map.png" alt="GPS Icon">
+                            <strong>GPS: </strong> <span id="gps-status">Unknown</span>
+                        </div>
+                        <div class="status-item">
+                            <img src="/static/icons/satellite.png" alt="Satellites Icon">
+                            <strong>Nbr of Satellites: </strong> <span id="gps-satellites">0</span>
+                        </div>
+                        <div class="status-item">
+                            <img src="/static/icons/rc.png" alt="RC Receiver Icon">
+                            <strong>RC Receiver: </strong> <span id="rc-receiver">Unknown</span>
+                        </div>
+                        <div class="status-item">
+                            <img src="/static/icons/battery.png" alt="Battery Icon">
+                            <strong>Battery: </strong> <span id="battery-status">Unknown</span>
+                        </div>
+                        <div class="status-item">
+                            <img src="/static/icons/cpu.png" alt="CPU Load Icon">
+                            <strong>CPU Load: </strong> <span id="cpu-load">0%</span>
+                        </div>
+                    </div>
+                    <div class="status-card">
+                        <h6>Ready To Fly</h6>
+                        <div id="ready-to-fly-light" class="status-light light-red"></div>
+                    </div>
+                </div>
+            </nav>
         </div>
     </div>
-
-    <!-- Include jQuery library -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/roslib.min.js') }}"></script>
+    <script>
+        $(document).ready(function() {
+            // Connect to Rosbridge WebSocket server
+            var ros = new ROSLIB.Ros({
+                url: 'ws://192.168.8.240:9090'  // Replace with the actual IP address of your drone
+            });
+
+            ros.on('connection', function() {
+                console.log('Connected to websocket server.');
+            });
+
+            ros.on('error', function(error) {
+                console.log('Error connecting to websocket server: ', error);
+            });
+
+            ros.on('close', function() {
+                console.log('Connection to websocket server closed.');
+            });
+
+            // Subscribe to /uav49/diagnostics topic
+            var diagnosticsListener = new ROSLIB.Topic({
+                ros: ros,
+                name: '/uav49/diagnostics',
+                messageType: 'diagnostic_msgs/DiagnosticArray'
+            });
+
+            diagnosticsListener.subscribe(function(message) {
+                message.status.forEach(function(status) {
+                    status.values.forEach(function(value) {
+                        switch (value.key) {
+                            case 'Autopilot type':
+                                $('#fcu-connected').text(value.value);
+                                break;
+                            case 'Frequency (Hz)':
+                                $('#fcu-heartbeat').text(value.value + ' Hz');
+                                break;
+                            case 'GPS':
+                                $('#gps-status').text(value.value);
+                                break;
+                            case 'Satellites visible':
+                                $('#gps-satellites').text(value.value);
+                                break;
+                            case 'rc receiver':
+                                $('#rc-receiver').text(value.value);
+                                break;
+                            case 'Battery':
+                                $('#battery-status').text(value.value);
+                                break;
+                            case 'CPU Load (%)':
+                                $('#cpu-load').text(value.value + '%');
+                                break;
+                            case 'RtF':
+                                if (value.value === 'Yes') {
+                                    $('#ready-to-fly-light').removeClass('light-red').addClass('light-green');
+                                } else {
+                                    $('#ready-to-fly-light').removeClass('light-green').addClass('light-red');
+                                }
+                                break;
+                            // Add more cases as needed for other status keys
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>
