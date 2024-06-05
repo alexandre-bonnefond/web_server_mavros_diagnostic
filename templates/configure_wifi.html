@@ -5,17 +5,17 @@
     {% if result %}
         <div class="alert alert-info">{{ result }}</div>
     {% endif %}
-    <form method="post">
+    <form id="wifi-form" method="post">
         <div class="form-section">
             <h3>Ethernet Configuration</h3>
             <div class="form-group">
                 <label for="eth_name">Ethernet Interface Name</label>
-                <input type="text" class="form-control" id="eth_name" name="eth_name" required>
+                <input type="text" class="form-control" id="eth_name" name="eth_name" value="eth0" required>
             </div>
             <div class="form-group">
                 <label for="use_dhcp_eth">Use DHCP</label>
                 <select class="form-control" id="use_dhcp_eth" name="use_dhcp_eth">
-                    <option value="yes">Yes</option>
+                    <option value="yes" selected>Yes</option>
                     <option value="no">No</option>
                 </select>
             </div>
@@ -28,12 +28,12 @@
             <h3>Wi-Fi Configuration</h3>
             <div class="form-group">
                 <label for="wifi_name">Wi-Fi Interface Name</label>
-                <input type="text" class="form-control" id="wifi_name" name="wifi_name" required>
+                <input type="text" class="form-control" id="wifi_name" name="wifi_name" value="wlan0" required>
             </div>
             <div class="form-group">
                 <label for="use_dhcp_wifi">Use DHCP</label>
                 <select class="form-control" id="use_dhcp_wifi" name="use_dhcp_wifi">
-                    <option value="yes">Yes</option>
+                    <option value="yes" selected>Yes</option>
                     <option value="no">No</option>
                 </select>
             </div>
@@ -58,8 +58,23 @@
                 <input type="text" class="form-control" id="wifi_dns" name="wifi_dns">
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Apply Configuration</button>
+        <button type="button" class="btn btn-primary" id="preview-btn">Preview Configuration</button>
+        <button type="submit" class="btn btn-primary" id="apply-btn" style="display:none;">Apply Configuration</button>
     </form>
+
+    <div id="preview-section" style="display:none;">
+        <h3>Netplan Configuration Preview</h3>
+        <pre id="netplan-preview"></pre>
+        <button type="button" class="btn btn-secondary" id="edit-btn">Edit</button>
+        <button type="button" class="btn btn-success" id="confirm-btn">Confirm and Apply</button>
+    </div>
+
+    <div id="status" style="display:none;">
+        <p id="status-message"></p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script>
         document.getElementById('use_dhcp_eth').addEventListener('change', function () {
             document.getElementById('eth_static_ip_group').style.display = this.value === 'no' ? 'block' : 'none';
@@ -75,6 +90,44 @@
             document.getElementById('wifi_static_ip_group').style.display = 'none';
             document.getElementById('wifi_gateway_group').style.display = 'none';
             document.getElementById('wifi_dns_group').style.display = 'none';
+        });
+
+        document.getElementById('preview-btn').addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('wifi-form'));
+            fetch('/preview_netplan', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('netplan-preview').textContent = data.netplan;
+                document.getElementById('preview-section').style.display = 'block';
+                document.getElementById('wifi-form').style.display = 'none';
+                document.getElementById('apply-btn').style.display = 'none';
+            });
+        });
+
+        document.getElementById('edit-btn').addEventListener('click', function() {
+            document.getElementById('preview-section').style.display = 'none';
+            document.getElementById('wifi-form').style.display = 'block';
+            document.getElementById('apply-btn').style.display = 'none';
+        });
+
+        document.getElementById('confirm-btn').addEventListener('click', function() {
+            const formData = new FormData(document.getElementById('wifi-form'));
+            fetch('/configure_wifi', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status').style.display = 'block';
+                document.getElementById('status-message').textContent = data.message;
+            })
+            .catch(error => {
+                document.getElementById('status').style.display = 'block';
+                document.getElementById('status-message').textContent = 'Failed to update Wi-Fi settings.';
+            });
         });
     </script>
 {% endblock %}
