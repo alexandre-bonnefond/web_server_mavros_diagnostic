@@ -147,7 +147,7 @@ def apply_netplan_configuration(data):
 def ssh_connect():
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    client.connect('localhost', username='uav', password='f4f')
+    client.connect('localhost', username='abo974', password='titounou974')
     return client
 
 # Initialize SSH shell
@@ -163,6 +163,7 @@ def read_ssh_output():
     while True:
         data = ssh_shell.recv(1024).decode('utf-8')
         if data:
+            print(f"Received data from SSH: {data}")  # Debugging output
             socketio.emit('output', data)
         socketio.sleep(0.1)
 
@@ -179,6 +180,7 @@ def on_disconnect():
 def handle_input(data):
     # Handle the input from the terminal and execute the command
     try:
+        print(f"Sending data to SSH: {data}")  # Debugging output
         ssh_shell.send(data)
     except Exception as e:
         emit('output', str(e))
