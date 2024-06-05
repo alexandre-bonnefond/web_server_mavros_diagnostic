@@ -37,13 +37,13 @@
         term.writeln('Welcome to the SSH terminal!');
 
         // Error handling
-        term.on('error', function(err) {
-            console.error('Terminal error:', err);
-        });
+        // term.on('error', function(err) {
+        //     console.error('Terminal error:', err);
+        // });
 
-        term.parser.on('error', function(err) {
-            console.error('xterm.js parsing error:', err);
-        });
+        // term.parser.on('error', function(err) {
+        //     console.error('xterm.js parsing error:', err);
+        // });
     });
 </script>
 {% endblock %}

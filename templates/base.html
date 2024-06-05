@@ -237,7 +237,7 @@
             diagnosticsListener.subscribe(function(message) {
                 message.status.forEach(function(status) {
                     status.values.forEach(function(value) {
-                        console.log('Key:', value.key); // Debugging output
+                        // console.log('Key:', value.key); // Debugging output
                         switch (value.key) {
                             case 'Autopilot type':
                                 $('#fcu-connected').text(value.value);
