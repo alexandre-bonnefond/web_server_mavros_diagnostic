@@ -65,7 +65,7 @@ def terminal():
 def drone_info():
     global uav_type
     return jsonify({
-        'ip': 'localhost',
+        'ip': '192.168.1.1',
         'model': uav_type
     })
 
@@ -142,22 +142,34 @@ def apply_netplan_configuration(data):
         return "Netplan configuration applied successfully."
     except subprocess.CalledProcessError as e:
         raise Exception(e.stderr)
-
-# Establish SSH connection only when terminal is accessed
+    
+# Establish SSH connection
 def ssh_connect():
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect('localhost', username='uav', password='f4f')
     return client
 
-# Initialize SSH shell when needed
-ssh_client = None
-ssh_shell = None
-uav_type = None
+# Initialize SSH shell
+ssh_client = ssh_connect()
+ssh_shell = ssh_client.invoke_shell()
+
+# Retrieve UAV_TYPE environment variable
+stdin, stdout, stderr = ssh_client.exec_command('echo $UAV_TYPE')
+uav_type = stdout.read().decode().strip()
+
+# Read from SSH shell
+def read_ssh_output():
+    while True:
+        data = ssh_shell.recv(1024).decode('utf-8')
+        if data:
+            socketio.emit('output', data)
+        socketio.sleep(0.1)
 
 @socketio.on('connect')
 def on_connect():
     print('Client connected')
+    socketio.start_background_task(target=read_ssh_output)
 
 @socketio.on('disconnect')
 def on_disconnect():
@@ -165,24 +177,11 @@ def on_disconnect():
 
 @socketio.on('input')
 def handle_input(data):
-    global ssh_client, ssh_shell, uav_type
-    if ssh_client is None:
-        ssh_client = ssh_connect()
-        ssh_shell = ssh_client.invoke_shell()
-        stdin, stdout, stderr = ssh_client.exec_command('echo $UAV_TYPE')
-        uav_type = stdout.read().decode().strip()
-        socketio.start_background_task(target=read_ssh_output)
-
-    ssh_shell.send(data)
-
-# Read from SSH shell
-def read_ssh_output():
-    while True:
-        if ssh_shell:
-            data = ssh_shell.recv(1024).decode('utf-8')
-            if data:
-                socketio.emit('output', data)
-        socketio.sleep(0.1)
+    # Handle the input from the terminal and execute the command
+    try:
+        ssh_shell.send(data)
+    except Exception as e:
+        emit('output', str(e))
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000, debug=True)
